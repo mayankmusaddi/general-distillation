@@ -1,0 +1,41 @@
+version: "3.8"
+services:
+    tensorboard:
+        image: dl-tensorboard
+        build:
+            context: ./
+            dockerfile: tensorboard.Dockerfile
+        ports:
+            - 8313:${TENSORBOARD_PORT}
+        volumes:
+            - ${ROOT_DIR}:/app
+        command:
+            [
+                "tensorboard",
+                "--logdir=${TENSORBOARD_DIR}",
+                "--port=${TENSORBOARD_PORT}",
+                "--bind_all",
+            ]
+
+    jupyter-server:
+        image: dl-jupyter
+        init: true
+        build:
+            context: ./
+            dockerfile: jupyter.Dockerfile
+        runtime: nvidia
+        env_file: ./.env
+        ports:
+            - 8312:${JUPYTER_PORT}
+        volumes:
+            - ${ROOT_DIR}:/app
+        command:
+            [
+                "jupyter",
+                "notebook",
+                "--ip=*",
+                "--port=${JUPYTER_PORT}",
+                "--allow-root",
+                "--notebook-dir=${JUPYTER_DIR}",
+                '--NotebookApp.token=${JUPYTER_TOKEN}'
+            ]
